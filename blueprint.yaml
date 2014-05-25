@@ -1,0 +1,168 @@
+# cloudify.types contains Cloudify's built-in types, relationships, workflows etc...
+imports:
+    - cloudify.types
+    - cloudify.bash
+
+plugins:
+    cloudstack_plugin:
+        derived_from: cloudify.plugins.manager_plugin
+        properties:
+            url: https://github.com/cloudify-cosmo/cloudify-cloudstack-plugin/archive/master.zip
+
+    nodecellar_config_plugin:
+        derived_from: cloudify.plugins.agent_plugin
+        properties:
+            folder: nodecellar-config-plugin
+
+
+types:
+    exoscale_security_group:
+        derived_from: cloudify.types.security_group
+        properties:
+            -   auth:
+                    API_KEY: API_KEY
+                    API_SECRET_KEY: API_SECRET_KEY 
+            - security_group
+            - rules: []
+        interfaces:
+            cloudify.interfaces.lifecycle:
+                - create: cloudstack_plugin.security_group.create
+                - delete: cloudstack_plugin.security_group.delete
+
+    exoscale_vm:
+        derived_from: cloudify.types.host     
+        properties:
+            -   auth:
+                    API_KEY: API_KEY
+                    API_SECRET_KEY: API_SECRET_KEY 
+            -   install_agent: true            
+            -   worker_config:
+                    user: root
+                    port: 22
+                    # example for ssh key file (see `key_name` below) 
+                    # this file matches the agent key configured during the bootstrap
+                    key: /root/.ssh/cloudify-agents-kp.pem
+                # Uncomment and update `management_network_name` when working a n neutron enabled openstack
+                # management_network_name: cloudify-admin-network
+            -   server:
+
+                ### if defined, will serve as the hostname for the started instance,
+                ### otherwise, the node_id will be used
+                 #name: no_name            ### HOST_NAME""
+                    image_id: 299fd26a-2b4f-4ff4-acfd-23d2682d65ba
+                    size: Medium
+                    keypair_name: cloudify-agents-kp
+                    security_groups: ['cloudify-agents-sg', 'node_cellar_security_group']
+        interfaces:
+            cloudify.interfaces.lifecycle:
+                -   delete: cloudstack_plugin.virtual_machine.delete
+                -   start: cloudstack_plugin.virtual_machine.start
+                -   stop: cloudstack_plugin.virtual_machine.stop
+            cloudify.interfaces.host:
+                -   get_state: cloudstack_plugin.virtual_machine.get_state
+
+    mongo_database:
+        derived_from: cloudify.types.bash.db_server
+        properties:
+            -   role
+            -   port
+
+    nodejs_server:
+        derived_from: cloudify.types.bash.app_server
+
+    nodejs_app:
+        derived_from: cloudify.types.bash.app_module
+        properties:
+            -   app_name
+            -   startup_script
+            -   git_url
+            -   git_branch
+            -   base_port
+            -   num_instances
+
+relationships:
+    nodecellar_connected_to_mongo:
+        derived_from: cloudify.relationships.connected_to
+        source_interfaces:
+            cloudify.interfaces.relationship_lifecycle:
+                - postconfigure: nodecellar_config_plugin.tasks.get_mongo_host_and_port
+        properties:
+            - env_file_path
+
+
+blueprint:
+    name: nodecellar
+    nodes:
+    
+    - name: node_cellar_security_group
+      type: exoscale_security_group
+      properties:
+        security_group:
+          name: node_cellar_security_group
+        rules:
+              - cidr: 0.0.0.0/0
+                start_port: 8080
+              - cidr: 0.0.0.0/0
+                start_port: 27017
+              - cidr: 0.0.0.0/0
+                start_port: 28017
+
+    - name: mongod_vm
+      type: exoscale_vm
+      instances:
+          deploy: 1
+      relationships:
+        - target: node_cellar_security_group
+          type: cloudify.relationships.depends_on
+
+    - name: nodejs_vm
+      type: exoscale_vm
+      instances:
+          deploy: 1
+      relationships:
+        - target: node_cellar_security_group
+          type: cloudify.relationships.depends_on
+
+    - name: mongod
+      type: mongo_database
+      properties:
+            role: mongod
+            port: 27017
+            scripts:            
+                create: mongo-scripts/install-mongo.sh
+                start: mongo-scripts/start-mongo.sh
+                stop: mongo-scripts/stop-mongo.sh
+      relationships:
+        - target: mongod_vm
+          type: cloudify.relationships.contained_in
+
+    - name: nodejs
+      type: nodejs_server
+      properties:
+            scripts:            
+                create: nodejs-scripts/install-nodejs.sh
+      relationships:
+        - type: cloudify.relationships.contained_in
+          target: nodejs_vm
+
+    - name: nodecellar_app
+      type: nodejs_app
+      properties:
+            app_name: nodecellar
+            startup_script: server.js
+            git_url: https://github.com/uric/nodecellar.git
+            git_branch: master 
+            base_port: 8080
+            num_instances: 1
+            scripts:            
+                create: nodejs-scripts/install-app.sh
+                start: nodejs-scripts/start-app.sh
+                stop: nodejs-scripts/stop-app.sh
+      relationships:
+        - type: cloudify.relationships.contained_in
+          target: nodejs
+        - type: nodecellar_connected_to_mongo 
+          target: mongod
+          properties:
+            env_file_path: /tmp/mongo_host_and_port.sh
+
