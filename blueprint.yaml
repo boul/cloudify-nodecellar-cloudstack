@@ -36,7 +36,7 @@ types:
                     API_KEY: API_KEY
                     API_SECRET_KEY: API_SECRET_KEY 
             -   install_agent: true            
-            -   worker_config:
+            -   cloudify_agent:
                     user: root
                     port: 22
                     # example for ssh key file (see `key_name` below) 
