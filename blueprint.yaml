@@ -1,7 +1,7 @@
 # cloudify.types contains Cloudify's built-in types, relationships, workflows etc...
 imports:
-    - cloudify.types
-    - cloudify.bash
+    - http://www.getcloudify.org/spec/bash-plugin/1.0/plugin.yaml
+    - http://www.getcloudify.org/spec/openstack-plugin/1.0/plugin.yaml
 
 plugins:
     cloudstack_plugin:
