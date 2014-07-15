@@ -14,7 +14,7 @@
 # * limitations under the License.
 from cloudify.decorators import operation
 from subprocess import call
-
+import pprint
 
 @operation
 def get_mongo_host_and_port(ctx, **kwargs):
@@ -24,8 +24,10 @@ def get_mongo_host_and_port(ctx, **kwargs):
     nodecellar startup script 
     """
     
+    
     mongo_ip_address = ctx.related.runtime_properties['ip_address']
     mongo_port = ctx.related.runtime_properties['port']
+    
     
     ctx.logger.info("Mongo IP address is {} and port is {}".format(mongo_ip_address, mongo_port))
 
