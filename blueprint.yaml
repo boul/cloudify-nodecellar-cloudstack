@@ -4,11 +4,14 @@ imports:
     - http://www.getcloudify.org/spec/openstack-plugin/1.0/plugin.yaml
 
 plugins:
+    cloudstack_exoscale_plugin:
+        derived_from: cloudify.plugins.manager_plugin
+        properties:
+            url: https://github.com/boul/cloudify-cloudstack-plugin/archive/develop.zip
     cloudstack_plugin:
         derived_from: cloudify.plugins.manager_plugin
         properties:
-            url: https://github.com/cloudify-cosmo/cloudify-cloudstack-plugin/archive/master.zip
-
+            url: https://github.com/boul/cloudify-cloudstack-plugin/archive/develop.zip
     nodecellar_config_plugin:
         derived_from: cloudify.plugins.agent_plugin
         properties:
@@ -16,25 +19,30 @@ plugins:
 
 
 types:
-    exoscale_security_group:
-        derived_from: cloudify.types.security_group
+    cloudstack_network:
+        derived_from: cloudify.types.network
         properties:
-            -   auth:
-                    API_KEY: API_KEY
-                    API_SECRET_KEY: API_SECRET_KEY 
-            - security_group
+            - auth:
+                    API_KEY: 'my apikey'
+                    API_SECRET_KEY: 'my secret key'
+                    API_URL: 'https://cloud/client/api'
+            - network:
+                    service_offering: SourceNatNiciraNvpNetwork
+                    zone: 'BETA-SBP-DC-1'
             - rules: []
+            
         interfaces:
             cloudify.interfaces.lifecycle:
-                - create: cloudstack_plugin.security_group.create
-                - delete: cloudstack_plugin.security_group.delete
+                - create: cloudstack_plugin.network.create
+                - delete: cloudstack_plugin.network.delete
 
-    exoscale_vm:
+    cloudstack_vm:
         derived_from: cloudify.types.host     
         properties:
             -   auth:
-                    API_KEY: API_KEY
-                    API_SECRET_KEY: API_SECRET_KEY 
+              	    API_KEY: 'my apikey'
+                    API_SECRET_KEY: 'my secret key'
+                    API_URL: 'https://cloud/client/api' 
             -   install_agent: true            
             -   cloudify_agent:
                     user: root
@@ -49,17 +57,17 @@ types:
                 ### if defined, will serve as the hostname for the started instance,
                 ### otherwise, the node_id will be used
                  #name: no_name            ### HOST_NAME""
-                    image_id: 299fd26a-2b4f-4ff4-acfd-23d2682d65ba
-                    size: Medium
+                    image_id: f181fccb-62ea-4296-a0a0-e773a1391dc8
+                    size: employee-medium-ha
                     keypair_name: cloudify-agents-kp
-                    security_groups: ['cloudify-agents-sg', 'node_cellar_security_group']
+                    networks: ['cloudify-agents-network', 'node_cellar_network']
         interfaces:
             cloudify.interfaces.lifecycle:
-                -   delete: cloudstack_plugin.virtual_machine.delete
-                -   start: cloudstack_plugin.virtual_machine.start
-                -   stop: cloudstack_plugin.virtual_machine.stop
+                -   delete: cloudstack_plugin.virtual_machine_in_network.delete
+                -   start: cloudstack_plugin.virtual_machine_in_network.start
+                -   stop: cloudstack_plugin.virtual_machine_in_network.stop
             cloudify.interfaces.host:
-                -   get_state: cloudstack_plugin.virtual_machine.get_state
+                -   get_state: cloudstack_plugin.virtual_machine_in_network.get_state
 
     mongo_database:
         derived_from: cloudify.types.bash.db_server
@@ -91,14 +99,17 @@ relationships:
 
 
 blueprint:
-    name: nodecellar
+    name: nodecellar_cloudstack
     nodes:
     
-    - name: node_cellar_security_group
-      type: exoscale_security_group
+    - name: node_cellar_network
+      type: cloudstack_network
       properties:
-        security_group:
-          name: node_cellar_security_group
+        network:
+          name: node_cellar_network
+          service_offering: SourceNatNiciraNvpNetwork
+          zone: 'BETA-SBP-DC-1'
+
         rules:
               - cidr: 0.0.0.0/0
                 start_port: 8080
@@ -108,20 +119,20 @@ blueprint:
                 start_port: 28017
 
     - name: mongod_vm
-      type: exoscale_vm
+      type: cloudstack_vm
       instances:
           deploy: 1
       relationships:
-        - target: node_cellar_security_group
-          type: cloudify.relationships.depends_on
+        - target: node_cellar_network
+          type: cloudify.relationships.contained_in
 
     - name: nodejs_vm
-      type: exoscale_vm
+      type: cloudstack_vm
       instances:
           deploy: 1
       relationships:
-        - target: node_cellar_security_group
-          type: cloudify.relationships.depends_on
+        - target: node_cellar_network
+          type: cloudify.relationships.contained_in
 
     - name: mongod
       type: mongo_database
