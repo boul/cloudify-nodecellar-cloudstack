@@ -85,6 +85,8 @@ node_types:
             git_branch: {}
             base_port: {}
             num_instances: {}
+            env_file_path:
+                default: ''
 
 relationships:
     nodecellar_connected_to_mongo:
@@ -92,8 +94,6 @@ relationships:
         source_interfaces:
             cloudify.interfaces.relationship_lifecycle:
                 - postconfigure: nodecellar_config_plugin.tasks.get_mongo_host_and_port
-        properties:
-            env_file_path: {}
 
 
 node_templates:
@@ -166,6 +166,3 @@ node_templates:
           target: nodejs
         - type: nodecellar_connected_to_mongo 
           target: mongod
-          properties:
-            env_file_path: /tmp/mongo_host_and_port.sh
-
