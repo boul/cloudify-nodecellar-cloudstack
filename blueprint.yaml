@@ -3,7 +3,7 @@ imports:
     - http://www.getcloudify.org/spec/bash-plugin/1.0/plugin.yaml
 
 plugins:
-    cloudstack-plugin:
+    cloudstack:
         derived_from: cloudify.plugins.manager_plugin
         properties:
             url: https://github.com/cloudify-cosmo/cloudify-cloudstack-plugin/archive/master.zip
@@ -27,8 +27,8 @@ node_types:
                 default: []
         interfaces:
             cloudify.interfaces.lifecycle:
-                - create: cloudstack-plugin.cloudstack_plugin.security_group.create
-                - delete: cloudstack-plugin.cloudstack_plugin.security_group.delete
+                - create: cloudstack.cloudstack_plugin.security_group.create
+                - delete: cloudstack.cloudstack_plugin.security_group.delete
 
     exoscale_vm:
         derived_from: cloudify.types.host     
@@ -60,11 +60,11 @@ node_types:
                     security_groups: ['cloudify-agents-sg', 'node_cellar_security_group']
         interfaces:
             cloudify.interfaces.lifecycle:
-                -   delete: cloudstack-plugin.cloudstack_plugin.virtual_machine.delete
-                -   start: cloudstack-plugin.cloudstack_plugin.virtual_machine.start
-                -   stop: cloudstack-plugin.cloudstack_plugin.virtual_machine.stop
+                -   delete: cloudstack.cloudstack_plugin.virtual_machine.delete
+                -   start: cloudstack.cloudstack_plugin.virtual_machine.start
+                -   stop: cloudstack.cloudstack_plugin.virtual_machine.stop
             cloudify.interfaces.host:
-                -   get_state: cloudstack-plugin.cloudstack_plugin.virtual_machine.get_state
+                -   get_state: cloudstack.cloudstack_plugin.virtual_machine.get_state
 
     mongo_database:
         derived_from: cloudify.types.bash.db_server
