@@ -1,15 +1,14 @@
 # cloudify.types contains Cloudify's built-in types, relationships, workflows etc...
 imports:
     - http://www.getcloudify.org/spec/bash-plugin/1.0/plugin.yaml
-    - http://www.getcloudify.org/spec/openstack-plugin/1.0/plugin.yaml
 
 plugins:
-    cloudstack_plugin:
+    cloudstack:
         derived_from: cloudify.plugins.manager_plugin
         properties:
             url: https://github.com/cloudify-cosmo/cloudify-cloudstack-plugin/archive/master.zip
 
-    nodecellar_config_plugin:
+    nodecellar-config-plugin:
         derived_from: cloudify.plugins.agent_plugin
         properties:
             folder: nodecellar-config-plugin
@@ -28,8 +27,8 @@ node_types:
                 default: []
         interfaces:
             cloudify.interfaces.lifecycle:
-                - create: cloudstack_plugin.security_group.create
-                - delete: cloudstack_plugin.security_group.delete
+                - create: cloudstack.cloudstack_plugin.security_group.create
+                - delete: cloudstack.cloudstack_plugin.security_group.delete
 
     exoscale_vm:
         derived_from: cloudify.types.host     
@@ -61,11 +60,11 @@ node_types:
                     security_groups: ['cloudify-agents-sg', 'node_cellar_security_group']
         interfaces:
             cloudify.interfaces.lifecycle:
-                -   delete: cloudstack_plugin.virtual_machine.delete
-                -   start: cloudstack_plugin.virtual_machine.start
-                -   stop: cloudstack_plugin.virtual_machine.stop
+                -   delete: cloudstack.cloudstack_plugin.virtual_machine.delete
+                -   start: cloudstack.cloudstack_plugin.virtual_machine.start
+                -   stop: cloudstack.cloudstack_plugin.virtual_machine.stop
             cloudify.interfaces.host:
-                -   get_state: cloudstack_plugin.virtual_machine.get_state
+                -   get_state: cloudstack.cloudstack_plugin.virtual_machine.get_state
 
     mongo_database:
         derived_from: cloudify.types.bash.db_server
@@ -93,7 +92,7 @@ relationships:
         derived_from: cloudify.relationships.connected_to
         source_interfaces:
             cloudify.interfaces.relationship_lifecycle:
-                - postconfigure: nodecellar_config_plugin.tasks.get_mongo_host_and_port
+                - postconfigure: nodecellar-config-plugin.nodecellar_config_plugin.tasks.get_mongo_host_and_port
 
 
 node_templates:

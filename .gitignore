@@ -52,3 +52,9 @@ coverage.xml
 # Sphinx documentation
 docs/_build/
 
+*.iml
+
+*COMMIT_MSG
+
+# QuickBuild
+.qbcache/
