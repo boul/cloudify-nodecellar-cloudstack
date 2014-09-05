@@ -33,6 +33,8 @@ sleep 1
 fi
 done
 if [ ${STARTED} = false ]; then
+    error "Failed to start mongodb in 120 seconds."
+    exit 1
 error "Failed to start mongodb in 120 seconds."
 exit 1
 fi

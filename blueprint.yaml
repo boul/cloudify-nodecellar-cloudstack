@@ -23,14 +23,14 @@ types:
         derived_from: cloudify.types.network
         properties:
             - auth:
-                    API_KEY: 'my apikey'
-                    API_SECRET_KEY: 'my secret key'
+                    API_KEY: 'api'
+                    API_SECRET_KEY: 'secret'
                     API_URL: 'https://cloud/client/api'
             - network:
                     service_offering: SourceNatNiciraNvpNetwork
                     zone: 'BETA-SBP-DC-1'
             - rules: []
-            
+
         interfaces:
             cloudify.interfaces.lifecycle:
                 - create: cloudstack_plugin.network.create
@@ -40,9 +40,10 @@ types:
         derived_from: cloudify.types.host     
         properties:
             -   auth:
-              	    API_KEY: 'my apikey'
-                    API_SECRET_KEY: 'my secret key'
-                    API_URL: 'https://cloud/client/api' 
+                    API_KEY: 'api'
+                    API_SECRET_KEY: 'secret'
+                    API_URL: 'https://cloud/client/api'
+
             -   install_agent: true            
             -   cloudify_agent:
                     user: root
@@ -57,10 +58,11 @@ types:
                 ### if defined, will serve as the hostname for the started instance,
                 ### otherwise, the node_id will be used
                  #name: no_name            ### HOST_NAME""
-                    image_id: f181fccb-62ea-4296-a0a0-e773a1391dc8
+                    image_id: 8e6cb1ed-9c9a-4e5b-88f4-407437fd5eee
                     size: employee-medium-ha
                     keypair_name: cloudify-agents-kp
-                    networks: ['cloudify-agents-network', 'node_cellar_network']
+                    networks: ['node_cellar_network']
+                    ip_address:
         interfaces:
             cloudify.interfaces.lifecycle:
                 -   delete: cloudstack_plugin.virtual_machine_in_network.delete
@@ -125,6 +127,13 @@ blueprint:
       relationships:
         - target: node_cellar_network
           type: cloudify.relationships.contained_in
+      properties:
+          server:
+              image_id: 8e6cb1ed-9c9a-4e5b-88f4-407437fd5eee
+              size: employee-medium-ha
+              keypair_name: cloudify-agents-kp
+              networks: ['node_cellar_network']
+              ip_address: 10.1.1.128
 
     - name: nodejs_vm
       type: cloudstack_vm
