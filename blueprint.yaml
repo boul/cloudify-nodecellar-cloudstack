@@ -7,11 +7,11 @@ plugins:
     cloudstack_exoscale_plugin:
         derived_from: cloudify.plugins.manager_plugin
         properties:
-            url: https://github.com/boul/cloudify-cloudstack-plugin/archive/develop.zip
+            url: https://github.com/boul/cloudify-cloudstack-plugin/archive/master.zip
     cloudstack_plugin:
         derived_from: cloudify.plugins.manager_plugin
         properties:
-            url: https://github.com/boul/cloudify-cloudstack-plugin/archive/develop.zip
+            url: https://github.com/boul/cloudify-cloudstack-plugin/archive/master.zip
     nodecellar_config_plugin:
         derived_from: cloudify.plugins.agent_plugin
         properties:
