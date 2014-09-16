@@ -1,4 +1,5 @@
-# cloudify.types contains Cloudify's built-in types, relationships, workflows etc...
+tosca_definitions_version: cloudify_1_0
+
 imports:
     - http://www.getcloudify.org/spec/bash-plugin/1.0/plugin.yaml
 
