@@ -4,14 +4,12 @@ imports:
 
 plugins:
     cloudstack:
-        derived_from: cloudify.plugins.manager_plugin
-        properties:
-            url: https://github.com/cloudify-cosmo/cloudify-cloudstack-plugin/archive/master.zip
+        executor: central_deployment_agent
+        source: https://github.com/cloudify-cosmo/cloudify-cloudstack-plugin/archive/master.zip
 
     nodecellar-config-plugin:
-        derived_from: cloudify.plugins.agent_plugin
-        properties:
-            folder: nodecellar-config-plugin
+        executor: host_agent
+        source: nodecellar-config-plugin
 
 
 node_types:
