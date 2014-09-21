@@ -24,10 +24,8 @@ source bin/activate
 * Type the following command: 
 
 ```
-pip install https://github.com/cloudify-cosmo/cloudify-cli/archive/3.0.zip --process-dependency-links
+pip install cloudify
 ```
-
-The `--process-dependency-links` flag is not required if you're using pip versions older than 1.5.  
 
 After the installation completes, you will have `cfy` command installed. Type `cfy -h` to verify that the installation completed successfully. You should see the help message. 
 
@@ -36,7 +34,7 @@ After the installation completes, you will have `cfy` command installed. Type `c
 Next, you need to install the Cloudify CloudStack provider. The provider allows the CLI to initialize a CloudStack  configuration and bootstrap a Cloudify manager on an CloudStack cloud (we used [Exoscale](https://www.exoscale.ch/) for this example). The bootstrap process creates two keypairs (named `cloudify-agents-kp` and `cloudify-management-kp`), two security groups (named `cloudify-agents-sg` and `cloudify-management-sg`), starts a management VM on the CloudStack cloud, and installs the Cloudify management components on it. These include (among other things) an Nginx proxy, a nodejs server for the Cloudify Web UI, an Flask API server, a Ruby based workflow engine, ElasticSearch and Logstash for log aggregation and runtime state, RabbitMQ for messaging, and a Python Celery worker for processing tasks that are created when triggering workflows. But from a user's perspective, all it takes to bootstrap a manager is a few simple steps. To install the CloudStack provider, type the following command in your CLI:
 
 ```
-pip install https://github.com/cloudify-cosmo/cloudify-cloudstack-provider/archive/master.zip --process-dependency-links
+pip install cloudify-openstack
 ```
 
 Note for Mac users: One of the libraries that's installed with the CloudStack provider (`pycrypto`) may fail to compile. This seems to be a [known issue](http://stackoverflow.com/questions/19617686/trying-to-install-pycrypto-on-mac-osx-mavericks/22868650#22868650). To solve it, type the following command in your terminal windows and try the installation again: 
