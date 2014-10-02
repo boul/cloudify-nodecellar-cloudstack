@@ -20,9 +20,9 @@ node_types:
         properties:
             auth:
                 default:
-                    API_KEY: 'ilNs5PCdpSqU_4OpFpW6OGPbyXzdGVG4Zbp7Y1jAo0SO4dzVhGCwpSlU4qRA1FYi4okl_k5dUjsOqgxF9sy31w'
-                    API_SECRET_KEY: '7ECptS1MpeC0oxvMyK8o4WlYB-drzEd-4985ZXNOcXt3WYvdhGCEiR_GtuwtIwCnXvvhTlTsOBAppwwONGIHZQ'
-                    API_URL: 'https://betacloud.mccx.schubergphilis.com/client/api'
+                    API_KEY: 'key'
+                    API_SECRET_KEY: 'secret'
+                    API_URL: 'https://cloud.client/api'
             network:
                 default:
                     service_offering: 'SourceNatNiciraNvpNetwork'
@@ -47,9 +47,9 @@ node_types:
         properties:
             auth:
                 default:
-                    API_KEY: 'ilNs5PCdpSqU_4OpFpW6OGPbyXzdGVG4Zbp7Y1jAo0SO4dzVhGCwpSlU4qRA1FYi4okl_k5dUjsOqgxF9sy31w'
-                    API_SECRET_KEY: '7ECptS1MpeC0oxvMyK8o4WlYB-drzEd-4985ZXNOcXt3WYvdhGCEiR_GtuwtIwCnXvvhTlTsOBAppwwONGIHZQ'
-                    API_URL: 'https://betacloud.mccx.schubergphilis.com/client/api'
+                    API_KEY: 'key'
+                    API_SECRET_KEY: 'secret'
+                    API_URL: 'https://cloud.client/api'
             install_agent:
                 default: true
             cloudify_agent:
@@ -68,6 +68,7 @@ node_types:
                     size: employee-medium-ha
                     keypair_name: cloudify-agents-kp
                     networks: ['node_cellar_network']
+                    ip_address: {}
         interfaces:
             cloudify.interfaces.lifecycle:
                 -   create: cloudstack.cloudstack_plugin.virtual_machine_in_network.create
@@ -132,9 +133,8 @@ node_templates:
         relationships:
             - target: node_cellar_network
               type: cloudify.relationships.connected_to
-        properties:
-            ip:
-                default: 10.1.1.60
+       
+
 
     nodejs_vm:
         type: cloudstack_vm
@@ -143,9 +143,7 @@ node_templates:
         relationships:
             - target: node_cellar_network
               type: cloudify.relationships.connected_to
-        properties:
-            ip:
-                default: 10.1.1.61
+        
 
     mongod:
         type: mongo_database
