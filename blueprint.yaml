@@ -3,7 +3,7 @@ tosca_definitions_version: cloudify_dsl_1_0
 imports:
     - http://www.getcloudify.org/spec/bash-plugin/1.1/plugin.yaml
     - http://www.getcloudify.org/spec/cloudify/3.1/types.yaml
-    - http://raw.githubusercontent.com/boul/cloudify-cloudstack-plugin/relationships/plugin.yaml.template
+    - http://raw.githubusercontent.com/boul/cloudify-cloudstack-plugin/relationships/plugin.yaml
 
 plugins:
     nodecellar_config_plugin:
@@ -107,11 +107,11 @@ node_templates:
     node_cellar_network:
       type: cloudify.cloudstack.network
       properties:
-           auth:
-                default:
-                    API_KEY: 'ilNs5PCdpSqU_4OpFpW6OGPbyXzdGVG4Zbp7Y1jAo0SO4dzVhGCwpSlU4qRA1FYi4okl_k5dUjsOqgxF9sy31w'
-                    API_SECRET_KEY: '7ECptS1MpeC0oxvMyK8o4WlYB-drzEd-4985ZXNOcXt3WYvdhGCEiR_GtuwtIwCnXvvhTlTsOBAppwwONGIHZQ'
-                    API_URL: 'https://betacloud.mccx.schubergphilis.com/client/api'
+          auth:
+              default:
+                  API_KEY: 'ilNs5PCdpSqU_4OpFpW6OGPbyXzdGVG4Zbp7Y1jAo0SO4dzVhGCwpSlU4qRA1FYi4okl_k5dUjsOqgxF9sy31w'
+                  API_SECRET_KEY: '7ECptS1MpeC0oxvMyK8o4WlYB-drzEd-4985ZXNOcXt3WYvdhGCEiR_GtuwtIwCnXvvhTlTsOBAppwwONGIHZQ'
+                  API_URL: 'https://betacloud.mccx.schubergphilis.com/client/api'
           network:
               name: node_cellar_network
               service_offering: 'SourceNatNiciraNvpNetwork'
