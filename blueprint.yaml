@@ -108,24 +108,22 @@ node_templates:
       type: cloudify.cloudstack.network
       properties:
           auth:
-              default:
-                  API_KEY: 'ilNs5PCdpSqU_4OpFpW6OGPbyXzdGVG4Zbp7Y1jAo0SO4dzVhGCwpSlU4qRA1FYi4okl_k5dUjsOqgxF9sy31w'
-                  API_SECRET_KEY: '7ECptS1MpeC0oxvMyK8o4WlYB-drzEd-4985ZXNOcXt3WYvdhGCEiR_GtuwtIwCnXvvhTlTsOBAppwwONGIHZQ'
-                  API_URL: 'https://betacloud.mccx.schubergphilis.com/client/api'
+              API_KEY: 'ilNs5PCdpSqU_4OpFpW6OGPbyXzdGVG4Zbp7Y1jAo0SO4dzVhGCwpSlU4qRA1FYi4okl_k5dUjsOqgxF9sy31w'
+              API_SECRET_KEY: '7ECptS1MpeC0oxvMyK8o4WlYB-drzEd-4985ZXNOcXt3WYvdhGCEiR_GtuwtIwCnXvvhTlTsOBAppwwONGIHZQ'
+              API_URL: 'https://betacloud.mccx.schubergphilis.com/client/api'
           network:
               name: node_cellar_network
               service_offering: 'SourceNatNiciraNvpNetwork'
               zone: 'BETA-SBP-DC-1'
-          firewall:
-              default:
-                  ingress:
-                      protocol: TCP
-                      cidr: 0.0.0.0/0
-                      ports: [5555, 5672, 53229, 22, 8100, 80]
-                  egress:
-                      protocol: TCP
-                      cidr: 0.0.0.0/0
-                      ports: [80, 443]
+          # firewall:
+          #     ingress:
+          #         protocol: TCP
+          #         cidr: 0.0.0.0/0
+          #         ports: [5555, 5672, 53229, 22, 8100, 80]
+          #     egress:
+          #         protocol: TCP
+          #         cidr: 0.0.0.0/0
+          #         ports: [80, 443]
 
     mongod_vm:
         type: virtual_machine
