@@ -39,7 +39,7 @@ node_types:
     #             - delete: cloudstack.cloudstack_plugin.network.delete
 
     virtual_machine:
-        derived_from: cloudify.cloudstack.server
+        derived_from: cloudify.cloudstack.virtual_machine
         properties:
             auth:
                 default:
