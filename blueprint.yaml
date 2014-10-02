@@ -14,44 +14,49 @@ plugins:
         executor: host_agent
         source: nodecellar-config-plugin
 
-    
-
 node_types:
     cloudstack_network:
         derived_from: cloudify.types.network
         properties:
             auth:
                 default:
-                    API_KEY: 'key'
-                    API_SECRET_KEY: 'key'
-                    API_URL: 'https://cloud/client/api'
+                    API_KEY: 'iAZO063NcUlwOeK9t7SP4CQxPyzj281jmhlxBLOfTGU502L2gCTIAyTXT0FgnhsnRpvWgdcD4atxwFfLezyDaw'
+                    API_SECRET_KEY: 'eC21a7s_kRF1Ry_6z4dOsSbQcgXoDVCSvFB756dbNPaY8Q3V-Vsm3MrU-ymP3Dfy_XUMC-v3nYNfWae2VGCUjw'
+                    API_URL: 'https://betacloud.mccx.schubergphilis.com/client/api'
             network:
                 default:
                     service_offering: 'SourceNatNiciraNvpNetwork'
                     zone: 'BETA-SBP-DC-1'
-            rules:
+            firewall:
                 default: {}
-            
+#                    ingress:
+#                        protocol:
+#                        cidr:
+#                        ports:
+#                    egress:
+#                        protocol:
+#                        cidr:
+#                        ports:
         interfaces:
             cloudify.interfaces.lifecycle:
                 - create: cloudstack.cloudstack_plugin.network.create
                 - delete:cloudify.cloudstack_plugin.network.delete
 
     cloudstack_vm:
-        derived_from: cloudify.types.host     
+        derived_from: cloudify.types.host
         properties:
             auth:
                 default:
-                    API_KEY: 'key'
-                    API_SECRET_KEY: 'key'
-                    API_URL: 'https://cloud/client/api'
+                    API_KEY: 'iAZO063NcUlwOeK9t7SP4CQxPyzj281jmhlxBLOfTGU502L2gCTIAyTXT0FgnhsnRpvWgdcD4atxwFfLezyDaw'
+                    API_SECRET_KEY: 'eC21a7s_kRF1Ry_6z4dOsSbQcgXoDVCSvFB756dbNPaY8Q3V-Vsm3MrU-ymP3Dfy_XUMC-v3nYNfWae2VGCUjw'
+                    API_URL: 'https://betacloud.mccx.schubergphilis.com/client/api'
             install_agent:
-                default: true            
+                default: true
             cloudify_agent:
                 default:
                     user: root
                     port: 22
-                    # example for ssh key file (see `key_name` below) 
+                    # example for ssh key file (see `key_name` below)
                     # this file matches the agent key configured during the bootstrap
                     key: /root/.ssh/cloudify-agents-kp.pem
             server:
@@ -63,7 +68,6 @@ node_types:
                     size: employee-medium-ha
                     keypair_name: cloudify-agents-kp
                     networks: ['node_cellar_network']
-                    ip_address: {}
         interfaces:
             cloudify.interfaces.lifecycle:
                 -   delete:cloudify.cloudstack_plugin.virtual_machine_in_network.delete
@@ -109,13 +113,16 @@ node_templates:
               name: node_cellar_network
               service_offering: 'SourceNatNiciraNvpNetwork'
               zone: 'BETA-SBP-DC-1'
-          rules:
-              - cidr: 0.0.0.0/0
-                start_port: 8080
-              - cidr: 0.0.0.0/0
-                start_port: 27017
-              - cidr: 0.0.0.0/0
-                start_port: 28017
+          firewall:
+              default:
+                  ingress:
+                      protocol: TCP
+                      cidr: 0.0.0.0/0
+                      ports: [5555, 5672, 53229, 22, 8100, 80]
+                  egress:
+                      protocol: TCP
+                      cidr: 0.0.0.0/0
+                      ports: [80, 443]
 
     mongod_vm:
         type: cloudstack_vm
@@ -124,6 +131,9 @@ node_templates:
         relationships:
             - target: node_cellar_network
               type: cloudify.relationships.connected_to
+        properties:
+            ip:
+                default: 10.1.1.60
 
     nodejs_vm:
         type: cloudstack_vm
@@ -132,13 +142,16 @@ node_templates:
         relationships:
             - target: node_cellar_network
               type: cloudify.relationships.connected_to
+        properties:
+            ip:
+                default: 10.1.1.61
 
     mongod:
         type: mongo_database
         properties:
             role: mongod
             port: 27017
-            scripts:            
+            scripts:
                 create: mongo-scripts/install-mongo.sh
                 start: mongo-scripts/start-mongo.sh
                 stop: mongo-scripts/stop-mongo.sh
@@ -149,7 +162,7 @@ node_templates:
     nodejs:
         type: nodejs_server
         properties:
-            scripts:            
+            scripts:
                 create: nodejs-scripts/install-nodejs.sh
         relationships:
             - type: cloudify.relationships.contained_in
@@ -161,17 +174,17 @@ node_templates:
             app_name: nodecellar
             startup_script: server.js
             git_url: https://github.com/cloudify-cosmo/nodecellar.git
-            git_branch: master 
+            git_branch: master
             base_port: 8080
             num_instances: 1
-            scripts:            
+            scripts:
                 create: nodejs-scripts/install-app.sh
                 start: nodejs-scripts/start-app.sh
                 stop: nodejs-scripts/stop-app.sh
         relationships:
             - type: cloudify.relationships.contained_in
               target: nodejs
-            - type: nodecellar_connected_to_mongo 
+            - type: nodecellar_connected_to_mongo
               target: mongod
-        
+
 
