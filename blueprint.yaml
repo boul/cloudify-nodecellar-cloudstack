@@ -107,10 +107,10 @@ node_templates:
     node_cellar_network:
       type: cloudify.cloudstack.network
       properties:
-          auth:
-              API_KEY: 'ilNs5PCdpSqU_4OpFpW6OGPbyXzdGVG4Zbp7Y1jAo0SO4dzVhGCwpSlU4qRA1FYi4okl_k5dUjsOqgxF9sy31w'
-              API_SECRET_KEY: '7ECptS1MpeC0oxvMyK8o4WlYB-drzEd-4985ZXNOcXt3WYvdhGCEiR_GtuwtIwCnXvvhTlTsOBAppwwONGIHZQ'
-              API_URL: 'https://betacloud.mccx.schubergphilis.com/client/api'
+          # auth:
+          #     API_KEY: 'ilNs5PCdpSqU_4OpFpW6OGPbyXzdGVG4Zbp7Y1jAo0SO4dzVhGCwpSlU4qRA1FYi4okl_k5dUjsOqgxF9sy31w'
+          #     API_SECRET_KEY: '7ECptS1MpeC0oxvMyK8o4WlYB-drzEd-4985ZXNOcXt3WYvdhGCEiR_GtuwtIwCnXvvhTlTsOBAppwwONGIHZQ'
+          #     API_URL: 'https://betacloud.mccx.schubergphilis.com/client/api'
           network:
               name: node_cellar_network
               service_offering: 'SourceNatNiciraNvpNetwork'
