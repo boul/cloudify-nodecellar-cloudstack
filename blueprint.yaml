@@ -10,42 +10,29 @@ plugins:
         executor: host_agent
         source: nodecellar-config-plugin
 
-node_types:
-    # cloudstack_network:
-    #     derived_from: cloudify.types.cloudstack.network
-    #     properties:
-    #         auth:
-    #             default:
-    #                 API_KEY: 'ilNs5PCdpSqU_4OpFpW6OGPbyXzdGVG4Zbp7Y1jAo0SO4dzVhGCwpSlU4qRA1FYi4okl_k5dUjsOqgxF9sy31w'
-    #                 API_SECRET_KEY: '7ECptS1MpeC0oxvMyK8o4WlYB-drzEd-4985ZXNOcXt3WYvdhGCEiR_GtuwtIwCnXvvhTlTsOBAppwwONGIHZQ'
-    #                 API_URL: 'https://betacloud.mccx.schubergphilis.com/client/api'
-    #         network:
-    #             default:
-    #                 service_offering: 'SourceNatNiciraNvpNetwork'
-    #                 zone: 'BETA-SBP-DC-1'
-    #         firewall:
-    #             default: 
-    #                 ingress:
-    #                     protocol:
-    #                     cidr:
-    #                     ports:
-    #                 egress:
-    #                     protocol:
-    #                     cidr:
-    #                     ports:
-    #     interfaces:
-    #         cloudify.interfaces.lifecycle:
-    #             - create: cloudstack.cloudstack_plugin.network.create
-    #             - delete: cloudstack.cloudstack_plugin.network.delete
+inputs:
+    cloudstack_api_url:
+        description: >
+            The Cloudstack API Url
+        default: "https;//betacloud.mccx.schubergphilis.com/client/api"
 
+    cloudstack_key:
+        description: >
+            The Cloudstack API key
+
+    cloudstack_secret:
+        description: >
+            The Cloudstack API secret
+
+node_types:
     virtual_machine:
         derived_from: cloudify.cloudstack.virtual_machine
         properties:
             auth:
                 default:
-                    API_KEY: 'ilNs5PCdpSqU_4OpFpW6OGPbyXzdGVG4Zbp7Y1jAo0SO4dzVhGCwpSlU4qRA1FYi4okl_k5dUjsOqgxF9sy31w'
-                    API_SECRET_KEY: '7ECptS1MpeC0oxvMyK8o4WlYB-drzEd-4985ZXNOcXt3WYvdhGCEiR_GtuwtIwCnXvvhTlTsOBAppwwONGIHZQ'
-                    API_URL: 'https://betacloud.mccx.schubergphilis.com/client/api'
+                    API_KEY: { get_input: cloudstack_key }
+                    API_SECRET_KEY: { get_input: cloudstack_secret }
+                    API_URL: { get_input: cloudstack_api_url }
             install_agent:
                 default: true
             cloudify_agent:
@@ -63,16 +50,12 @@ node_types:
                     image_id: 8e6cb1ed-9c9a-4e5b-88f4-407437fd5eee
                     size: employee-medium-ha
                     keypair_name: cloudify-agents-kp
-                    networks: ['node_cellar_network']
+                    # node can only be in either default_network OR security_group NOT both
+                    # extra networks will be added through relationships if neeeded.
+                    default_network: ['node_cellar_network']
+                    #default_security_group ['node_cellar_security_group']
                     ip_address: {}
-        # interfaces:
-        #     cloudify.interfaces.lifecycle:
-        #         -   create: cloudstack.cloudstack_plugin.virtual_machine_in_network.create
-        #         -   delete: cloudstack.cloudstack_plugin.virtual_machine_in_network.delete
-        #         -   start: cloudstack.cloudstack_plugin.virtual_machine_in_network.start
-        #         -   stop: cloudstack.cloudstack_plugin.virtual_machine_in_network.stop
-        #     cloudify.interfaces.host:
-        #         -   get_state: cloudstack.cloudstack_plugin.virtual_machine_in_network.get_state
+     
 
     mongo_database:
         derived_from: cloudify.types.bash.db_server
@@ -107,23 +90,23 @@ node_templates:
     node_cellar_network:
       type: cloudify.cloudstack.network
       properties:
-          # auth:
-          #     API_KEY: 'ilNs5PCdpSqU_4OpFpW6OGPbyXzdGVG4Zbp7Y1jAo0SO4dzVhGCwpSlU4qRA1FYi4okl_k5dUjsOqgxF9sy31w'
-          #     API_SECRET_KEY: '7ECptS1MpeC0oxvMyK8o4WlYB-drzEd-4985ZXNOcXt3WYvdhGCEiR_GtuwtIwCnXvvhTlTsOBAppwwONGIHZQ'
-          #     API_URL: 'https://betacloud.mccx.schubergphilis.com/client/api'
+          auth:
+              API_KEY: { get_input: cloudstack_key }
+              API_SECRET_KEY: { get_input: cloudstack_secret }
+              API_URL: { get_input: cloudstack_api_url }
           network:
               name: node_cellar_network
               service_offering: 'SourceNatNiciraNvpNetwork'
               zone: 'BETA-SBP-DC-1'
-          # firewall:
-          #     ingress:
-          #         protocol: TCP
-          #         cidr: 0.0.0.0/0
-          #         ports: [5555, 5672, 53229, 22, 8100, 80]
-          #     egress:
-          #         protocol: TCP
-          #         cidr: 0.0.0.0/0
-          #         ports: [80, 443]
+          firewall:
+              ingress:
+                  protocol: TCP
+                  cidr: 0.0.0.0/0
+                  ports: [5555, 5672, 53229, 22, 8100, 80]
+              egress:
+                  protocol: TCP
+                  cidr: 0.0.0.0/0
+                  ports: [80, 443]
 
     mongod_vm:
         type: virtual_machine
