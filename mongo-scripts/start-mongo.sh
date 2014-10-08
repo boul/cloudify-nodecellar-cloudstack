@@ -7,7 +7,7 @@ function error(){ builtin echo [ERROR] [$(basename $0)] $@; }
 #. ${CLOUDIFY_FILE_SERVER}
 
 TEMP_DIR="/tmp"
-MONGO_ROOT=${TEMP_DIR}/mongodb
+MONGO_ROOT=${TEMP_DIR}/${CLOUDIFY_EXECUTION_ID}/mongodb
 PID_FILE="mongo.pid"
 
 info "Changing directory to ${MONGO_ROOT}"
@@ -23,29 +23,27 @@ STARTED=false
 REST_PORT=`expr ${port} + 1000`
 for i in $(seq 1 120)
 do
-if wget http://localhost:${REST_PORT} 2>/dev/null ; then
-info "Server is up."
-STARTED=true
-break
-else
-info "mongodb not up. waiting 1 second."
-sleep 1
-fi
+    if wget http://localhost:${REST_PORT} 2>/dev/null ; then
+        info "Server is up."
+        STARTED=true
+        break
+    else
+        info "mongodb not up. waiting 1 second."
+        sleep 1
+    fi  
 done
 if [ ${STARTED} = false ]; then
     error "Failed to start mongodb in 120 seconds."
     exit 1
-error "Failed to start mongodb in 120 seconds."
-exit 1
 fi
-# Installing jq to parse json
+# Installing jq to parse json 
 info "Installing jq"
 if [ ! -f ./jq ]; then
-wget http://stedolan.github.io/jq/download/linux64/jq || exit $?
-chmod +x ./jq || exit $?
-info "jq installed sucessfully"
-else
-info "Skipping, jq already installed"
+    wget http://stedolan.github.io/jq/download/linux64/jq || exit $?
+    chmod +x ./jq || exit $?
+    info "jq installed sucessfully"
+else 
+    info "Skipping, jq already installed"
 fi
 
 info "Getting latest state version of current node ${CLOUDIFY_NODE_ID} from cloudify manager at ${CLOUDIFY_MANAGER_IP}"

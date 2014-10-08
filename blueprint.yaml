@@ -1,12 +1,12 @@
 tosca_definitions_version: cloudify_dsl_1_0
 
 imports:
-    - http://www.getcloudify.org/spec/bash-plugin/1.1/plugin.yaml
-    - http://www.getcloudify.org/spec/cloudify/3.1/types.yaml
+    - http://www.getcloudify.org/spec/bash-plugin/1.1m4/plugin.yaml
+    - http://www.getcloudify.org/spec/cloudify/3.1m4/types.yaml
     - https://raw.githubusercontent.com/boul/cloudify-cloudstack-plugin/relationships/plugin.yaml.template
 
 plugins:
-    nodecellar_config_plugin:
+    nodecellar_config:
         executor: host_agent
         source: nodecellar-config-plugin
 
@@ -14,7 +14,7 @@ inputs:
     cloudstack_api_url:
         description: >
             The Cloudstack API Url
-        default: "https;//betacloud.mccx.schubergphilis.com/client/api"
+        default: "https://betacloud.mccx.schubergphilis.com/client/api"
 
     cloudstack_key:
         description: >
@@ -28,11 +28,6 @@ node_types:
     virtual_machine:
         derived_from: cloudify.cloudstack.virtual_machine
         properties:
-            auth:
-                default:
-                    API_KEY: { get_input: cloudstack_key }
-                    API_SECRET_KEY: { get_input: cloudstack_secret }
-                    API_URL: { get_input: cloudstack_api_url }
             install_agent:
                 default: true
             cloudify_agent:
@@ -83,19 +78,32 @@ relationships:
         derived_from: cloudify.relationships.connected_to
         source_interfaces:
             cloudify.interfaces.relationship_lifecycle:
-                - postconfigure: nodecellar_config_plugin.tasks.get_mongo_host_and_port
+                - postconfigure: nodecellar_config.nodecellar_config_plugin.tasks.get_mongo_host_and_port
 
 
 node_templates:
     node_cellar_network:
       type: cloudify.cloudstack.network
       properties:
-          auth:
-              API_KEY: { get_input: cloudstack_key }
-              API_SECRET_KEY: { get_input: cloudstack_secret }
-              API_URL: { get_input: cloudstack_api_url }
           network:
               name: node_cellar_network
+              service_offering: 'SourceNatNiciraNvpNetwork'
+              zone: 'BETA-SBP-DC-1'
+          firewall:
+              ingress:
+                  protocol: TCP
+                  cidr: 0.0.0.0/0
+                  ports: [5555, 5672, 53229, 22, 8100, 80]
+              egress:
+                  protocol: TCP
+                  cidr: 0.0.0.0/0
+                  ports: [80, 443]
+
+    test_network:
+      type: cloudify.cloudstack.network
+      properties:
+          network:
+              name: test_network
               service_offering: 'SourceNatNiciraNvpNetwork'
               zone: 'BETA-SBP-DC-1'
           firewall:
@@ -115,6 +123,8 @@ node_templates:
         relationships:
             - target: node_cellar_network
               type: cloudify.relationships.connected_to
+            - target: test_network
+              type: cloudify.cloudstack.virtual_machine_connected_to_network
        
 
 

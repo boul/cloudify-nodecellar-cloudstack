@@ -14,7 +14,7 @@
 # * limitations under the License.
 from cloudify.decorators import operation
 from subprocess import call
-import pprint
+
 
 @operation
 def get_mongo_host_and_port(ctx, **kwargs):
@@ -24,14 +24,14 @@ def get_mongo_host_and_port(ctx, **kwargs):
     nodecellar startup script 
     """
     
-    
     mongo_ip_address = ctx.related.runtime_properties['ip_address']
     mongo_port = ctx.related.runtime_properties['port']
     
-    
     ctx.logger.info("Mongo IP address is {} and port is {}".format(mongo_ip_address, mongo_port))
 
-    env_file_path = ctx.properties.get("env_file_path", "/tmp/mongo_host_and_port.sh")
+    env_file_path = \
+        ctx.properties['env_file_path'] or \
+        "/tmp/{0}/mongo_host_and_port.sh".format(ctx.execution_id)
     ctx.logger.info("Writing file {}".format(env_file_path))
 
     with open(env_file_path, 'w') as env_file:

@@ -8,7 +8,7 @@ PLUGINS_COMMON = "https://github.com/cloudify-cosmo/cloudify-plugins-common/tarb
 setup(
     zip_safe=True,
     name='nodecellar-config-plugin',
-    version='0.1.0',
+    version='3.1a4',
     author='uric',
     author_email='uri@gigaspaces.com',
     packages=[
