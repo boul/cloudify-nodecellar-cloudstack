@@ -40,7 +40,7 @@ else
         git checkout ${git_branch} || exit $?
     fi 
     info "Installing application modules using npm" 
-    ${NODEJS_ROOT}/nodejs/nodejs/bin/npm install --silent || exit $?
+    ${NODEJS_ROOT}/nodejs/bin/npm install --silent || exit $?
 fi
 
 info "Finished installing application ${app_name}"
