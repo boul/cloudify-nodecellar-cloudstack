@@ -99,6 +99,12 @@ node_templates:
                   cidr: 0.0.0.0/0
                   ports: [80, 443]
 
+    floatingip:
+    type: cloudify.cloudstack.floatingip    
+    properties:
+      floatingip:
+        floating_network_name: node_cellar_network
+
     test_network:
       type: cloudify.cloudstack.network
       properties:
