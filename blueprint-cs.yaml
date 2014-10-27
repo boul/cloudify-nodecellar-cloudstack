@@ -3,7 +3,7 @@ tosca_definitions_version: cloudify_dsl_1_0
 imports:
     - http://www.getcloudify.org/spec/bash-plugin/1.1m4/plugin.yaml
     - http://www.getcloudify.org/spec/cloudify/3.1m4/types.yaml
-    - https://raw.githubusercontent.com/boul/cloudify-cloudstack-plugin/floatingip/plugin.yaml.template
+    - https://raw.githubusercontent.com/boul/cloudify-cloudstack-plugin/master/plugin.yaml.template
 
 plugins:
     nodecellar_config:
@@ -28,6 +28,13 @@ node_types:
     virtual_machine:
         derived_from: cloudify.cloudstack.virtual_machine
         properties:
+            portmaps:
+                default: {}
+            network:
+                default:
+                    default_network: ['node_cellar_network']
+                    #default_security_group ['node_cellar_security_group']
+                    ip_address: {}
             install_agent:
                 default: true
             cloudify_agent:
@@ -47,10 +54,6 @@ node_types:
                     keypair_name: cloudify-agents-kp
                     # node can only be in either default_network OR security_group NOT both
                     # extra networks will be added through relationships if neeeded.
-                    default_network: ['node_cellar_network']
-                    #default_security_group ['node_cellar_security_group']
-                    ip_address: {}
-     
 
     mongo_database:
         derived_from: cloudify.types.bash.db_server
@@ -104,6 +107,9 @@ node_templates:
       properties:
         floatingip:
           floating_network_name: node_cellar_network
+      relationships:
+          - target: node_cellar_network
+            type: cloudify.cloudstack.floating_ip_connected_to_network
 
     test_network:
       type: cloudify.cloudstack.network
@@ -131,17 +137,31 @@ node_templates:
               type: cloudify.relationships.connected_to
             - target: test_network
               type: cloudify.cloudstack.virtual_machine_connected_to_network
-       
-
 
     nodejs_vm:
         type: virtual_machine
         instances:
           deploy: 1
+        properties:
+            portmaps:
+                - protocol: TCP
+                  private_port: 8080
+                  private_end_port: 8080
+                  public_port: 8080
+                  public_end_port: 8080
+                  open_firewall: True
+                - protocol: TCP
+                  private_port: 8081
+                  private_end_port: 8081
+                  public_port: 8081
+                  public_end_port: 8081
+                  open_firewall: False
+
         relationships:
             - target: node_cellar_network
               type: cloudify.relationships.connected_to
-        
+            - target: floatingip
+              type: cloudify.cloudstack.virtual_machine_connected_to_floating_ip
 
     mongod:
         type: mongo_database
